@@ -4,6 +4,17 @@
 @section('page-title', 'Reports')
 @section('page-subtitle', 'Appointment and activity summary')
 
+@section('page-actions')
+    <div class="btn-group">
+        <a href="{{ route('reports.export-csv') }}" class="btn btn-success m-2 rounded">
+            <i class="bi bi-filetype-csv me-1"></i>Export CSV
+        </a>
+        <a href="{{ route('reports.export-pdf') }}" class="btn btn-danger m-2 rounded">
+            <i class="bi bi-filetype-pdf me-1"></i>Export PDF
+        </a>
+    </div>
+@endsection
+
 @section('content')
 
     <div class="row g-3 mb-4">

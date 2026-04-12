@@ -5,9 +5,11 @@
 @section('page-subtitle', 'View and manage all appointments')
 
 @section('page-actions')
-    <a href="{{ route('appointments.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i>New Appointment
-    </a>
+    @if (!auth()->user()->isStaff())
+        <a href="{{ route('appointments.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>New Appointment
+        </a>
+    @endif
 @endsection
 
 @section('content')
@@ -58,7 +60,13 @@
                                 </span><br>
                                 <small class="text-muted">{{ $appt->appointment_time }}</small>
                             </td>
-                            <td>{{ $appt->client->full_name }}</td>
+                            <td>
+                                @if ($appt->client)
+                                    {{ $appt->client->full_name }}
+                                @else
+                                    <span class="text-muted">Client Deleted</span>
+                                @endif
+                            </td>
                             <td>{{ $appt->service_type }}</td>
                             <td>{{ $appt->staff->name }}</td>
                             <td>@statusBadge($appt->status)</td>
@@ -66,9 +74,12 @@
                                 <a href="{{ route('appointments.show', $appt) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('appointments.edit', $appt) }}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                @if (!auth()->user()->isStaff())
+                                    <a href="{{ route('appointments.edit', $appt) }}"
+                                        class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endif
                             </td>
                         </tr>
                     @empty

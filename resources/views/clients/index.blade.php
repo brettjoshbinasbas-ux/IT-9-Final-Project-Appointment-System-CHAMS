@@ -5,9 +5,11 @@
 @section('page-subtitle', 'Manage registered clients')
 
 @section('page-actions')
-    <a href="{{ route('clients.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i>Add Client
-    </a>
+    @if (!auth()->user()->isStaff())
+        <a href="{{ route('clients.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Add Client
+        </a>
+    @endif
 @endsection
 
 @section('content')
@@ -52,9 +54,11 @@
                                 <a href="{{ route('clients.show', $client) }}" class="btn btn-sm btn-outline-primary">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <a href="{{ route('clients.edit', $client) }}" class="btn btn-sm btn-outline-secondary">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
+                                @if (!auth()->user()->isStaff())
+                                    <a href="{{ route('clients.edit', $client) }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                @endif
                                 @if (auth()->check() && auth()->user()->isAdmin())
                                     <form action="{{ route('clients.destroy', $client) }}" method="POST" class="d-inline"
                                         onsubmit="return confirm('Delete {{ $client->full_name }}?')">

@@ -5,9 +5,11 @@
 @section('page-subtitle', 'Client Profile')
 
 @section('page-actions')
-    <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning me-2">
-        <i class="bi bi-pencil me-1"></i>Edit
-    </a>
+    @if (!auth()->user()->isStaff())
+        <a href="{{ route('clients.edit', $client) }}" class="btn btn-warning me-2">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+    @endif
     <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Back
     </a>

@@ -6,6 +6,7 @@ use App\Models\ServiceRecord;
 use App\Http\Requests\StoreServiceRecordRequest;
 use App\Http\Requests\UpdateServiceRecordRequest;
 use App\Models\Appointment;
+use App\Models\Client;
 
 class ServiceRecordController extends Controller
 {

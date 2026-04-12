@@ -5,9 +5,11 @@
 @section('page-subtitle', $appointment->client->full_name . ' — ' . $appointment->service_type)
 
 @section('page-actions')
-    <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-warning me-2">
-        <i class="bi bi-pencil me-1"></i>Edit
-    </a>
+    @if (!auth()->user()->isStaff())
+        <a href="{{ route('appointments.edit', $appointment) }}" class="btn btn-warning me-2">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+    @endif
     <a href="{{ route('appointments.index') }}" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-1"></i>Back
     </a>

@@ -217,6 +217,10 @@
                         class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
                         <i class="bi bi-person-gear me-2"></i>Users
                     </a>
+                    <a href="{{ route('clients.trashed') }}"
+                        class="nav-link {{ request()->routeIs('clients.trashed') ? 'active' : '' }}">
+                        <i class="bi bi-archive me-2"></i>Archive
+                    </a>
                 @endif
             </nav>
 

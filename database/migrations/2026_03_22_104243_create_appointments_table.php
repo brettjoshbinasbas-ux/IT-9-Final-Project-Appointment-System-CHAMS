@@ -29,6 +29,7 @@ return new class extends Migration
             ])->default('scheduled');
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

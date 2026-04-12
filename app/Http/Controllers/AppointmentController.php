@@ -54,9 +54,10 @@ class AppointmentController extends Controller
     public function store(StoreAppointmentRequest $request)
     {
         $data = $request->validated();
-        $data['created_by'] = Auth::id(); // ← Fixed
+        $data['created_by'] = Auth::id();
+        $data['status'] = 'scheduled'; // ← Force status to scheduled
 
-        Appointment::create($data);
+        Appointment::forceCreate($data);
 
         return redirect()->route('appointments.index')->with('success', 'Appointment scheduled successfully!');
     }

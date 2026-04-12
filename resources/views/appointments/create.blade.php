@@ -88,7 +88,7 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
+                            {{-- <div class="col-12">
                                 <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
                                 <select name="status" class="form-select @error('status') is-invalid @enderror">
                                     <option value="">-- Select Status --</option>
@@ -102,7 +102,7 @@
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                            </div>
+                            </div> --}}
 
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Notes</label>

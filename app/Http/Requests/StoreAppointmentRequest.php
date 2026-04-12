@@ -31,7 +31,7 @@ class StoreAppointmentRequest extends FormRequest
             'service_type' => 'required|string|max:255',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
-            'status' => ['required',Rule::in(array_keys(Appointment::STATUSES))],
+            // 'status' => ['required','in:scheduled'],
             'notes' => 'nullable|string|max:1000'
             ];
     }
