@@ -95,15 +95,24 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{id}/restore', [UserController::class, 'restore'])->name('restore');
                 Route::delete('/{id}/force-delete', [UserController::class, 'forceDelete'])->name('force-delete');
             });
-    });
 
-    Route::prefix('settings')
-        ->name('admin.settings.')
-        ->group(function () {
-            Route::get('/', [SettingController::class, 'index'])->name('index');
-            Route::put('/', [SettingController::class, 'update'])->name('update');
-            Route::get('/reset', [SettingController::class, 'reset'])->name('reset');
-        });
+        // Client restore & force delete (admin only)
+        Route::prefix('clients')
+            ->name('clients.')
+            ->group(function () {
+                Route::post('/{id}/restore', [ClientController::class, 'restore'])->name('restore');
+                Route::delete('/{id}/force-delete', [ClientController::class, 'forceDelete'])->name('force-delete');
+            });
+
+        // System Settings (admin only) - MOVED INSIDE the admin group
+        Route::prefix('settings')
+            ->name('admin.settings.')
+            ->group(function () {
+                Route::get('/', [SettingController::class, 'index'])->name('index');
+                Route::put('/', [SettingController::class, 'update'])->name('update');
+                Route::get('/reset', [SettingController::class, 'reset'])->name('reset');
+            });
+    });
 });
 
 require __DIR__ . '/auth.php';
