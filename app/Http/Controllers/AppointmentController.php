@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
+use App\Http\Requests\UpdateAppointmentRequest;
+use App\Models\AppointmentHistory;
 use App\Models\Client;
 use App\Models\User;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // ← Add at top
+use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
 {
@@ -67,7 +70,7 @@ class AppointmentController extends Controller
      */
     public function show(Appointment $appointment)
     {
-        $appointment->load(['client', 'staff', 'creator', 'serviceRecord']);
+        $appointment->load(['client', 'staff', 'creator', 'serviceRecord', 'histories.changer']);
 
         return view('appointments.show', compact('appointment'));
     }
@@ -91,13 +94,18 @@ class AppointmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreAppointmentRequest $request, Appointment $appointment)
+    public function update(UpdateAppointmentRequest $request, Appointment $appointment)
     {
         if ($appointment->status === 'completed') {
             return redirect()->route('appointments.show', $appointment)->with('error', 'Completed appointments cannot be edited.');
         }
 
+        $oldStatus = $appointment->status;
         $appointment->update($request->validated());
+
+        if ($oldStatus !== $appointment->status) {
+            $this->recordStatusChange($appointment, $oldStatus);
+        }
 
         return redirect()->route('appointments.show', $appointment)->with('success', 'Appointment updated successfully!');
     }
@@ -106,14 +114,31 @@ class AppointmentController extends Controller
     public function updateStatus(Request $request, Appointment $appointment)
     {
         if ($appointment->status === 'completed') {
-            return redirect()->route('appointments.show', $appointment)->with('error', 'Completed appointments cannot change status.');
+            return response()->json(
+                [
+                    'message' => 'Completed appointments cannot change status.',
+                ],
+                422,
+            );
         }
 
         $request->validate([
-            'status' => ['required', \Illuminate\Validation\Rule::in(array_keys(Appointment::STATUSES))],
+            'status' => ['required', Rule::in(array_keys(Appointment::STATUSES))],
         ]);
 
+        $oldStatus = $appointment->status;
         $appointment->update(['status' => $request->status]);
+
+        // Record the change
+        $this->recordStatusChange($appointment, $oldStatus);
+
+        // Return JSON for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'message' => 'Appointment status updated successfully.',
+                'new_status' => $appointment->status,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Appointment status updated.');
     }
@@ -126,5 +151,28 @@ class AppointmentController extends Controller
         $appointment->delete();
 
         return redirect()->route('appointments.index')->with('success', 'Appointment deleted.');
+    }
+
+    protected function recordStatusChange(Appointment $appointment, $oldStatus, $notes = null)
+    {
+        AppointmentHistory::create([
+            'appointment_id' => $appointment->id,
+            'old_status' => $oldStatus,
+            'new_status' => $appointment->status,
+            'changed_by' => Auth::id(),
+            'notes' => $notes,
+        ]);
+    }
+
+    public function kanban()
+    {
+        $appointments = Appointment::with(['client', 'staff'])
+            ->orderBy('appointment_date')
+            ->orderBy('appointment_time')
+            ->get();
+
+        $appointmentsByStatus = Appointment::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status');
+
+        return view('appointments.kanban', compact('appointments', 'appointmentsByStatus'));
     }
 }

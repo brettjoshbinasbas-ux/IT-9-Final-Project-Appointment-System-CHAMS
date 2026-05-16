@@ -67,6 +67,63 @@
 
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-pie-chart me-2 text-primary"></i>Appointments by Status
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-graph-up me-2 text-success"></i>Weekly Trend
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" height="250"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            // Status Pie Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: {!! json_encode($statusLabels) !!},
+                    datasets: [{
+                        data: {!! json_encode($statusCounts) !!},
+                        backgroundColor: ['#5f9ea0', '#8b5a8f', '#6b8f5e', '#b54a5c', '#c9a53b']
+                    }]
+                }
+            });
+
+            // Weekly Trend Line Chart
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($weekLabels) !!},
+                    datasets: [{
+                        label: 'Appointments',
+                        data: {!! json_encode($weekCounts) !!},
+                        borderColor: '#8b5a8f',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                }
+            });
+        </script>
+    @endpush
+
     {{-- ── Two Columns ─────────────────────────────────────────────── --}}
     <div class="row g-3">
 

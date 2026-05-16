@@ -12,15 +12,7 @@ class Appointment extends Model
     /** @use HasFactory<\Database\Factories\AppointmentFactory> */
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'client_id',
-        'staff_id',
-        'service_type',
-        'appointment_date',
-        'appointment_time',
-        'status',
-        'notes',
-    ];
+    protected $fillable = ['client_id', 'staff_id', 'service_type', 'appointment_date', 'appointment_time', 'status', 'notes'];
 
     protected $casts = [
         'appointment_date' => 'date',
@@ -46,41 +38,82 @@ class Appointment extends Model
 
     public function client()
     {
-        return $this->belongsTo(Client::class,'client_id');
+        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function staff()
     {
-        return $this->belongsTo(User::class,'staff_id');
+        return $this->belongsTo(User::class, 'staff_id');
     }
 
     public function creator()
     {
-        return $this->belongsTo(User::class,'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function serviceRecord()
     {
-        return $this->hasOne(ServiceRecord::class,'appointment_id');
+        return $this->hasOne(ServiceRecord::class, 'appointment_id');
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(AppointmentHistory::class)->latest();
+    }
+
+    // accessor
+    public function getFulfillmentStatusAttribute(): string
+    {
+        $today = today();
+        $dueDate = $this->appointment_date;
+
+        if ($this->status === 'completed') {
+            return '✅ Completed';
+        }
+
+        if ($this->status === 'cancelled') {
+            return '❌ Cancelled';
+        }
+
+        if ($dueDate->isPast()) {
+            return '🔴 Overdue';
+        }
+
+        if ($dueDate->isToday()) {
+            return '🟡 Due Today';
+        }
+
+        if ($dueDate->isFuture()) {
+            return '🟢 Upcoming';
+        }
+
+        return '⚪ Pending';
     }
 
     // Query Builder Scopes
 
     public function scopeToday(Builder $query)
     {
-        return $query->whereDate('appointment_date',today());
+        return $query->whereDate('appointment_date', today());
     }
 
     public function scopeUpcoming(Builder $query)
     {
-        return $query->whereDate('appointment_date','>=',today())
-                     ->where('status','!=','cancelled')
-                     ->orderBy('appointment_date')
-                     ->orderBy('appointment_time');
+        return $query->whereDate('appointment_date', '>=', today())->where('status', '!=', 'cancelled')->orderBy('appointment_date')->orderBy('appointment_time');
     }
-    
+
     public function scopeByStatus(Builder $query, string $status)
     {
-        return $query->where('status',$status);
+        return $query->where('status', $status);
+    }
+
+    public function scopeDueToday(Builder $query)
+    {
+        return $query->whereDate('appointment_date', today())->whereIn('status', ['scheduled', 'confirmed']);
+    }
+
+    public function scopeOverdue(Builder $query)
+    {
+        return $query->whereDate('appointment_date', '<', today())->whereIn('status', ['scheduled', 'confirmed']);
     }
 }
