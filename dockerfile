@@ -71,4 +71,11 @@ RUN mkdir -p storage/framework/cache \
 
 EXPOSE 10000
 
-CMD ["apache2-foreground"]
+# Create startup script
+RUN echo '#!/bin/bash\n\
+php artisan migrate --force\n\
+php artisan db:seed --force\n\
+apache2-foreground' > /start.sh \
+&& chmod +x /start.sh
+
+CMD ["/start.sh"]
