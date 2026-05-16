@@ -201,7 +201,7 @@
                 </form>
 
                 <!-- Demo Credentials (Optional - remove in production) -->
-                @if (config('app.env') !== 'production')
+              
                     <div class="demo-credentials">
                         <h6><i class="bi bi-info-circle"></i> Demo Credentials</h6>
                         <small><i class="bi bi-person-circle"></i> <strong>Admin:</strong> <code>admin@gmail.com</code>
@@ -211,7 +211,7 @@
                         <small><i class="bi bi-person-badge"></i> <strong>Receptionist:</strong>
                             <code>receptionist@gmail.com</code> / <code>receptionist123</code></small>
                     </div>
-                @endif
+        
             </div>
         </div>
     </div>
