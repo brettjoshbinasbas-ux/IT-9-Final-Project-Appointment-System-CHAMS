@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,10 +11,9 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    // Show active users only
+    // Show all users (including soft deleted)
     public function index()
     {
-        // Show all users (including soft deleted) with trashed ones at the bottom
         $users = User::withTrashed()->latest()->get();
         return view('users.index', compact('users'));
     }
@@ -33,6 +33,33 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User account created successfully!');
     }
 
+    /**
+     * Show the form for editing the specified user.
+     */
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        $data = $request->validated();
+
+        // Only update password if provided
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully!');
+    }
+
     // Soft delete user
     public function destroy(User $user)
     {
@@ -40,12 +67,10 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('error', 'You cannot delete your own account.');
         }
 
-        // Check if user has important active records
         if ($user->assignedAppointments()->whereNull('deleted_at')->exists() || $user->createdAppointments()->whereNull('deleted_at')->exists()) {
             return redirect()->route('users.index')->with('error', 'Cannot delete user with active appointments. Reassign or complete appointments first.');
         }
 
-        // Soft delete
         $user->delete();
 
         return redirect()->route('users.index')->with('success', 'User account deactivated successfully!');
@@ -67,14 +92,13 @@ class UserController extends Controller
         return redirect()->route('users.trashed')->with('success', 'User restored successfully!');
     }
 
-    // Permanently delete user (only if no related records)
+    // Permanently delete user
     public function forceDelete($id)
     {
         $user = User::withTrashed()->findOrFail($id);
 
-        // Check if user has any related records (including soft-deleted ones)
         if ($user->assignedAppointments()->withTrashed()->exists() || $user->createdAppointments()->withTrashed()->exists() || $user->serviceRecords()->withTrashed()->exists() || $user->histories()->exists()) {
-            return redirect()->route('users.trashed')->with('error', 'Cannot permanently delete user with existing records. Archive the records first.');
+            return redirect()->route('users.trashed')->with('error', 'Cannot permanently delete user with existing records.');
         }
 
         $user->forceDelete();

@@ -49,6 +49,10 @@
                             <td>
                                 @if ($user->id !== auth()->id())
                                     @if ($user->isActive())
+                                        <!-- Add Edit Button -->
+                                        <a href="{{ route('users.edit', $user) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil"></i> Edit
+                                        </a>
                                         <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline"
                                             onsubmit="return confirm('Deactivate {{ $user->name }}? They can be restored later.')">
                                             @csrf
