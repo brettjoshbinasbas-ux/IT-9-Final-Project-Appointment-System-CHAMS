@@ -1,10 +1,8 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Kanban Board'); ?>
+<?php $__env->startSection('page-title', 'Kanban Board'); ?>
+<?php $__env->startSection('page-subtitle', 'Drag and drop to update status'); ?>
 
-@section('title', 'Kanban Board')
-@section('page-title', 'Kanban Board')
-@section('page-subtitle', 'Drag and drop to update status')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 
     <style>
         .kanban-column {
@@ -101,48 +99,53 @@
 
     <div style="margin-left: 10%; margin-top: 5%;">
         <div class="row g-3" id="kanban-board">
-            @foreach (App\Models\Appointment::STATUSES as $statusValue => $statusLabel)
+            <?php $__currentLoopData = App\Models\Appointment::STATUSES; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusValue => $statusLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-md-2">
                     <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header kanban-column-header fw-semibold" data-status="{{ $statusValue }}">
-                            {{ $statusLabel }}
+                        <div class="card-header kanban-column-header fw-semibold" data-status="<?php echo e($statusValue); ?>">
+                            <?php echo e($statusLabel); ?>
+
                             <span class="badge bg-light text-dark float-end">
-                                {{ $appointmentsByStatus[$statusValue] ?? 0 }}
+                                <?php echo e($appointmentsByStatus[$statusValue] ?? 0); ?>
+
                             </span>
                         </div>
-                        <div class="card-body kanban-column" data-status="{{ $statusValue }}">
-                            @foreach ($appointments->where('status', $statusValue) as $appt)
-                                <div class="card mb-2 kanban-card shadow-sm" data-id="{{ $appt->id }}"
-                                    data-status="{{ $appt->status }}" draggable="true">
+                        <div class="card-body kanban-column" data-status="<?php echo e($statusValue); ?>">
+                            <?php $__currentLoopData = $appointments->where('status', $statusValue); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $appt): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <div class="card mb-2 kanban-card shadow-sm" data-id="<?php echo e($appt->id); ?>"
+                                    data-status="<?php echo e($appt->status); ?>" draggable="true">
                                     <div class="card-body p-2">
                                         <p class="fw-semibold mb-0 small">
-                                            @if ($appt->client)
-                                                {{ $appt->client->full_name }}
-                                            @else
-                                                <span class="text-muted">[Deleted Client #{{ $appt->client_id }}]</span>
-                                            @endif
+                                            <?php if($appt->client): ?>
+                                                <?php echo e($appt->client->full_name); ?>
+
+                                            <?php else: ?>
+                                                <span class="text-muted">[Deleted Client #<?php echo e($appt->client_id); ?>]</span>
+                                            <?php endif; ?>
                                         </p>
-                                        <small class="text-muted">{{ $appt->service_type }}</small><br>
+                                        <small class="text-muted"><?php echo e($appt->service_type); ?></small><br>
                                         <small class="text-secondary">
-                                            <i class="bi bi-calendar3"></i> {{ $appt->appointment_date->format('M d') }}
-                                            <i class="bi bi-clock"></i> {{ $appt->appointment_time }}
+                                            <i class="bi bi-calendar3"></i> <?php echo e($appt->appointment_date->format('M d')); ?>
+
+                                            <i class="bi bi-clock"></i> <?php echo e($appt->appointment_time); ?>
+
                                         </small>
                                         <div class="mt-1">
-                                            <small class="text-muted">Staff: {{ $appt->staff->name }}</small>
+                                            <small class="text-muted">Staff: <?php echo e($appt->staff->name); ?></small>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
                 </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
     </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let draggedCard = null;
@@ -238,4 +241,6 @@
             }
         });
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\laravel patient-appointment-tracker-final\IT-9-Final-Project-Appointment-System-CHAMS\resources\views/appointments/kanban.blade.php ENDPATH**/ ?>
